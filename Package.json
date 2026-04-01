@@ -1,0 +1,18 @@
+{
+  "name": "nox-system",
+  "version": "1.0.0",
+  "description": "⚡ NØX SYSTEM — Bot Discord Tactique DayZ PS5",
+  "main": "nox_bot.js",
+  "scripts": {
+    "start": "node nox_bot.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.15.3",
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "NØX CORE ENGINE",
+  "license": "ISC"
+}
