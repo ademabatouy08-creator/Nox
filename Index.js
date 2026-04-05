@@ -686,15 +686,15 @@ ${LINE}`)
 
         // Boutons de confirmation
         const row = new ActionRowBuilder().addComponents(
-            new ButtonBuilder().setCustomId(`dmall_confirm_${i.id}`).setLabel('✅ CONFIRMER L'ENVOI').setStyle(ButtonStyle.Danger),
+            new ButtonBuilder().setCustomId(`dmall_confirm_${i.id}`).setLabel('✅ CONFIRMER ENVOI').setStyle(ButtonStyle.Danger),
             new ButtonBuilder().setCustomId(`dmall_cancel_${i.id}`).setLabel('❌ ANNULER').setStyle(ButtonStyle.Secondary)
         );
 
-        const preview = noxEmbed('📨 PRÉVISUALISATION DU DM — CONFIRMATION REQUISE', COLORS.WARNING)
+        const preview = noxEmbed('📨 PREVISUALISATION DU DM — CONFIRMATION REQUISE', COLORS.WARNING)
             .setDescription(`**Contenu du message :**
 \`\`\`${texte}\`\`\`
 ⚠️ Ce message sera envoyé en DM à **tous les membres** du serveur.
-Confirme l\'envoi ci-dessous.`);
+Confirme en cliquant ci-dessous.`);
 
         // Stocker le texte temporairement
         client._dmallPending = client._dmallPending || new Map();
@@ -833,7 +833,7 @@ ${LINE}`)
             } catch { echecs++; }
         }
 
-        const rapport = noxEmbed('📨 DM ALL — RAPPORT D'ENVOI', COLORS.SUCCESS)
+        const rapport = noxEmbed('📨 DM ALL — RAPPORT ENVOI', COLORS.SUCCESS)
             .addFields(
                 { name: '✅ Envoyés',  value: `\`${succes}\``,  inline: true },
                 { name: '❌ Échoués', value: `\`${echecs}\``,  inline: true },
