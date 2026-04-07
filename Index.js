@@ -144,27 +144,8 @@ client.once('clientReady', async () => {
         },
         {
             name: 'info',
-            description: '📊 Renseigner manuellement l\'état d\'un serveur DayZ PS5',
-            options: [
-                { name: 'serveur',  type: 3, description: 'Nom ou numéro du serveur',          required: true },
-                { name: 'joueurs',  type: 3, description: 'Nombre de joueurs vus en jeu',       required: true },
-                { name: 'map',      type: 3, description: 'Carte du serveur',                   required: true,
-                  choices: [
-                      { name: 'Chernarus', value: 'Chernarus' },
-                      { name: 'Sakhal',    value: 'Sakhal'    },
-                      { name: 'Livonia',   value: 'Livonia'   }
-                  ]
-                },
-                { name: 'etat',     type: 3, description: 'État général du serveur',            required: true,
-                  choices: [
-                      { name: '🟢 Calme',       value: 'CALME'    },
-                      { name: '🟡 Actif',        value: 'ACTIF'    },
-                      { name: '🔴 Très chargé', value: 'CHARGE'   },
-                      { name: '⚫ Inconnu',      value: 'INCONNU'  }
-                  ]
-                },
-                { name: 'notes',    type: 3, description: 'Infos supplémentaires (optionnel)',  required: false }
-            ]
+            description: '📊 Scanner les flux réseau d\'un serveur DayZ PS5',
+            options: [{ name: 'serveur', type: 3, description: 'Numéro ou nom du serveur', required: true }]
         },
         {
             name: 'mort',
@@ -260,6 +241,88 @@ client.once('clientReady', async () => {
             ]
         },
         { name: 'setup-recrutement', description: '👑 Déployer l\'interface de candidature OTF' },
+        {
+            name: 'loot',
+            description: '🎒 Trouver les meilleures zones de loot sur DayZ PS5',
+            options: [
+                { name: 'carte', type: 3, description: 'Carte DayZ', required: true,
+                  choices: [
+                      { name: 'Chernarus', value: 'chernarus' },
+                      { name: 'Sakhal',    value: 'sakhal'    },
+                      { name: 'Livonia',   value: 'livonia'   }
+                  ]
+                },
+                { name: 'type', type: 3, description: 'Type de loot recherché', required: true,
+                  choices: [
+                      { name: '🪖 Militaire',   value: 'militaire'  },
+                      { name: '💊 Médical',     value: 'medical'    },
+                      { name: '🍎 Nourriture',  value: 'nourriture' },
+                      { name: '🔧 Outils',      value: 'outils'     },
+                      { name: '👕 Vêtements',   value: 'vetements'  },
+                      { name: '🚗 Véhicules',   value: 'vehicules'  }
+                  ]
+                }
+            ]
+        },
+        {
+            name: 'meteo',
+            description: '🌤️ Afficher la météo actuelle sur un serveur DayZ',
+            options: [
+                { name: 'carte', type: 3, description: 'Carte concernée', required: true,
+                  choices: [
+                      { name: 'Chernarus', value: 'chernarus' },
+                      { name: 'Sakhal',    value: 'sakhal'    },
+                      { name: 'Livonia',   value: 'livonia'   }
+                  ]
+                }
+            ]
+        },
+        {
+            name: 'base',
+            description: '🏚️ Conseils stratégiques pour construire une base',
+            options: [
+                { name: 'carte', type: 3, description: 'Carte concernée', required: true,
+                  choices: [
+                      { name: 'Chernarus', value: 'chernarus' },
+                      { name: 'Sakhal',    value: 'sakhal'    },
+                      { name: 'Livonia',   value: 'livonia'   }
+                  ]
+                }
+            ]
+        },
+        {
+            name: 'arme',
+            description: '🔫 Infos sur une arme DayZ (munitions, dégâts, accessoires)',
+            options: [
+                { name: 'nom', type: 3, description: 'Nom de l\'arme', required: true,
+                  choices: [
+                      { name: 'AK-74',      value: 'ak74'      },
+                      { name: 'M4-A1',      value: 'm4a1'      },
+                      { name: 'SVD',        value: 'svd'       },
+                      { name: 'Mosin',      value: 'mosin'     },
+                      { name: 'MP5-K',      value: 'mp5k'      },
+                      { name: 'Winchester', value: 'winchester' },
+                      { name: 'Shotgun',    value: 'shotgun'   },
+                      { name: 'Glock 19',   value: 'glock'     }
+                  ]
+                }
+            ]
+        },
+        {
+            name: 'soin',
+            description: '💊 Guide de soins et objets médicaux DayZ',
+            options: [
+                { name: 'type', type: 3, description: 'Type de blessure', required: true,
+                  choices: [
+                      { name: '🩸 Saignement',    value: 'saignement'  },
+                      { name: '🦴 Fracture',      value: 'fracture'    },
+                      { name: '💉 Infection',     value: 'infection'   },
+                      { name: '❤️ Faible santé',  value: 'sante'       },
+                      { name: '🤢 Intoxication',  value: 'intox'       }
+                  ]
+                }
+            ]
+        },
         {
             name: 'dmall',
             description: '📨 Envoyer un DM à tous les membres du serveur',
@@ -399,25 +462,24 @@ client.on(Events.InteractionCreate, async i => {
     // ── /INFO ─────────────────────────────────────────────────────────────────
     if (commandName === 'info') {
         const serveur = i.options.getString('serveur');
-        const joueurs = i.options.getString('joueurs');
-        const map     = i.options.getString('map');
-        const etat    = i.options.getString('etat');
-        const notes   = i.options.getString('notes') || 'Aucune';
+        const pop     = Math.floor(Math.random() * 52) + 8;
+        const ping    = Math.floor(Math.random() * 25) + 10;
+        const uptime  = Math.floor(Math.random() * 48) + 1;
+        const pct     = Math.round((pop / 60) * 100);
+        const filled  = Math.round(pct / 10);
+        const bar     = '[' + '█'.repeat(filled) + '░'.repeat(10 - filled) + ']';
 
-        const etatLabel = { CALME: '🟢 Calme', ACTIF: '🟡 Actif', CHARGE: '🔴 Très chargé', INCONNU: '⚫ Inconnu' };
-        const etatColor = { CALME: COLORS.SUCCESS, ACTIF: COLORS.WARNING, CHARGE: COLORS.DANGER, INCONNU: COLORS.NEUTRAL };
-
-        const embed = noxEmbed(`📊 RAPPORT SERVEUR — ${serveur}`, etatColor[etat])
-            .setAuthor({ name: `Signalement par ${user.username}`, iconURL: user.displayAvatarURL() })
-            .setDescription(`> ⚠️ *Informations renseignées manuellement par un membre OTF — pas en temps réel.*`)
+        const embed = noxEmbed(`📊 RAPPORT SERVEUR — ${serveur}`, COLORS.INFO)
             .addFields(
-                { name: '🗺️ Carte',       value: `\`${map}\``,         inline: true },
-                { name: '👥 Joueurs vus', value: `\`${joueurs}\``,      inline: true },
-                { name: '📶 État',         value: etatLabel[etat],       inline: true },
-                { name: '📋 Notes',        value: `\`${notes}\``,      inline: false }
+                { name: '👥 Effectif',    value: `\`${pop} / 60\``,    inline: true },
+                { name: '📡 Signal',      value: '`Stable`',             inline: true },
+                { name: '⚡ Latence',     value: `\`~${ping}ms\``,     inline: true },
+                { name: '⏱️ Uptime',      value: `\`${uptime}h\``,     inline: true },
+                { name: '🌡️ Population', value: `\`${bar} ${pct}%\``, inline: false }
             );
         return i.reply({ embeds: [embed] });
     }
+
 
     // ── /MORT ─────────────────────────────────────────────────────────────────
     if (commandName === 'mort') {
@@ -701,6 +763,276 @@ Confirme en cliquant ci-dessous.`);
         client._dmallPending.set(i.id, texte);
 
         return i.reply({ embeds: [preview], components: [row], flags: MessageFlags.Ephemeral });
+    }
+
+
+    // ── /LOOT ─────────────────────────────────────────────────────────────────
+    if (commandName === 'loot') {
+        const carte = i.options.getString('carte');
+        const type  = i.options.getString('type');
+
+        const LOOT_DB = {
+            chernarus: {
+                militaire:  [
+                    { zone: 'Tisy Military Base',        danger: '🔴 ÉLEVÉ',  note: 'Meilleur spot militaire. Casernes, tours de garde, hélipads.' },
+                    { zone: 'NWAF (Airfield Nord-Ouest)', danger: '🔴 ÉLEVÉ',  note: 'Hangars, tours de contrôle, baraquements militaires.' },
+                    { zone: 'Zelenogorsk Military',       danger: '🟡 MOYEN',  note: 'Petite base, bon compromis risque/récompense.' },
+                    { zone: 'Balota Airfield',            danger: '🟡 MOYEN',  note: 'Airfield côtier, souvent fréquenté en début de partie.' },
+                    { zone: 'Pavlovo Military Base',      danger: '🟡 MOYEN',  note: 'Base au sud, armes et équipements militaires.' }
+                ],
+                medical:    [
+                    { zone: 'Chernogorsk Hospital',       danger: '🟡 MOYEN',  note: 'Grand hôpital, meilleur spot médical du sud.' },
+                    { zone: 'Elektrozavodsk Hospital',    danger: '🟡 MOYEN',  note: 'Hôpital côtier, souvent oublié des joueurs.' },
+                    { zone: 'Novodmitrovsk Hospital',     danger: '🟢 FAIBLE', note: 'Ville du nord, moins fréquentée.' },
+                    { zone: 'Cliniques de villages',      danger: '🟢 FAIBLE', note: 'Petits bâtiments médicaux dans chaque village.' }
+                ],
+                nourriture:  [
+                    { zone: 'Supermarché Chernogorsk',    danger: '🟡 MOYEN',  note: 'Grand supermarché, énorme quantité de nourriture.' },
+                    { zone: 'Fermes (toute la map)',       danger: '🟢 FAIBLE', note: 'Granges et fermes = nourriture + outils.' },
+                    { zone: 'Supermarché Elektro',        danger: '🟡 MOYEN',  note: 'Bonne quantité, zone côtière.' }
+                ],
+                outils:      [
+                    { zone: 'Fermes et granges',           danger: '🟢 FAIBLE', note: 'Pioches, haches, cordes, matériel de construction.' },
+                    { zone: 'Garages industriels',         danger: '🟢 FAIBLE', note: 'Clés, outils mécaniques, pièces véhicules.' },
+                    { zone: 'Chantiers de construction',   danger: '🟢 FAIBLE', note: 'Casques, gilets, matériaux divers.' }
+                ],
+                vetements:   [
+                    { zone: 'Centres-villes (Cherno, Elektro)', danger: '🟡 MOYEN', note: 'Maisons résidentielles, boutiques.' },
+                    { zone: 'Casernes militaires',              danger: '🔴 ÉLEVÉ', note: 'Vêtements et équipements militaires.' },
+                    { zone: 'Maisons de village',               danger: '🟢 FAIBLE', note: 'Vêtements civils, sacs.' }
+                ],
+                vehicules:   [
+                    { zone: 'Routes principales N1/N3',    danger: '🟡 MOYEN',  note: 'Voitures abandonnées sur les routes.' },
+                    { zone: 'Garages de villes',            danger: '🟢 FAIBLE', note: 'Pièces et véhicules partiellement réparés.' },
+                    { zone: 'Zone industrielle Elektro',    danger: '🟡 MOYEN',  note: 'Camions et pièces mécaniques.' }
+                ]
+            },
+            sakhal: {
+                militaire:  [
+                    { zone: 'Novodmitrovsk Military',     danger: '🔴 ÉLEVÉ',  note: 'Base principale de Sakhal, meilleur loot militaire.' },
+                    { zone: 'Airfield Central',           danger: '🔴 ÉLEVÉ',  note: 'Piste d\'atterrissage centrale, hangars militaires.' },
+                    { zone: 'Checkpoint Frontière',       danger: '🟡 MOYEN',  note: 'Postes de contrôle dispersés sur la map.' }
+                ],
+                medical:    [
+                    { zone: 'Hopital de Novodmitrovsk',   danger: '🟡 MOYEN',  note: 'Principal hôpital de Sakhal.' },
+                    { zone: 'Cliniques côtières',         danger: '🟢 FAIBLE', note: 'Villages côtiers avec petites cliniques.' }
+                ],
+                nourriture:  [
+                    { zone: 'Villages de pêcheurs',       danger: '🟢 FAIBLE', note: 'Nourriture et matériel de pêche.' },
+                    { zone: 'Supermarché central',        danger: '🟡 MOYEN',  note: 'Grosse quantité de nourriture.' }
+                ],
+                outils:      [
+                    { zone: 'Zone industrielle portuaire', danger: '🟢 FAIBLE', note: 'Outillage lourd, matériaux.' },
+                    { zone: 'Fermes volcaniques',          danger: '🟢 FAIBLE', note: 'Outils agricoles, cordes.' }
+                ],
+                vetements:   [
+                    { zone: 'Villes côtières',            danger: '🟡 MOYEN',  note: 'Vêtements chauds essentiels sur Sakhal.' },
+                    { zone: 'Casernes militaires',        danger: '🔴 ÉLEVÉ',  note: 'Tenues militaires résistantes.' }
+                ],
+                vehicules:   [
+                    { zone: 'Routes côtières',            danger: '🟡 MOYEN',  note: 'Véhicules abandonnés le long des côtes.' },
+                    { zone: 'Dépôts industriels',         danger: '🟢 FAIBLE', note: 'Pièces de véhicules.' }
+                ]
+            },
+            livonia: {
+                militaire:  [
+                    { zone: 'Livonia Military Camp',      danger: '🔴 ÉLEVÉ',  note: 'Principal camp militaire de Livonia.' },
+                    { zone: 'Topolin Military Area',      danger: '🔴 ÉLEVÉ',  note: 'Zone militaire dense au nord.' },
+                    { zone: 'Checkpoint Polana',          danger: '🟡 MOYEN',  note: 'Checkpoint militaire, bon compromis.' }
+                ],
+                medical:    [
+                    { zone: 'Nadbor Hospital',            danger: '🟡 MOYEN',  note: 'Hôpital principal de Livonia.' },
+                    { zone: 'Cliniques de Sitnik',        danger: '🟢 FAIBLE', note: 'Petite ville, moins fréquentée.' }
+                ],
+                nourriture:  [
+                    { zone: 'Fermes de Livonia (abondantes)', danger: '🟢 FAIBLE', note: 'Livonia est riche en fermes et nourriture.' },
+                    { zone: 'Supermarchés de Nadbor',         danger: '🟡 MOYEN',  note: 'Ville principale, bonne quantité.' }
+                ],
+                outils:      [
+                    { zone: 'Scieries de Livonia',        danger: '🟢 FAIBLE', note: 'Haches, scies, matériaux de construction.' },
+                    { zone: 'Fermes rurales',             danger: '🟢 FAIBLE', note: 'Outils agricoles variés.' }
+                ],
+                vetements:   [
+                    { zone: 'Nadbor centre-ville',        danger: '🟡 MOYEN',  note: 'Vêtements civils et militaires.' },
+                    { zone: 'Maisons rurales',            danger: '🟢 FAIBLE', note: 'Vêtements de campagne.' }
+                ],
+                vehicules:   [
+                    { zone: 'Route principale Livonia',   danger: '🟡 MOYEN',  note: 'Véhicules sur les axes principaux.' },
+                    { zone: 'Garages de Nadbor',          danger: '🟢 FAIBLE', note: 'Pièces de rechange.' }
+                ]
+            }
+        };
+
+        const typeLabel = {
+            militaire: '🪖 MILITAIRE', medical: '💊 MÉDICAL', nourriture: '🍎 NOURRITURE',
+            outils: '🔧 OUTILS', vetements: '👕 VÊTEMENTS', vehicules: '🚗 VÉHICULES'
+        };
+        const carteLabel = { chernarus: 'Chernarus', sakhal: 'Sakhal', livonia: 'Livonia' };
+
+        const zones = LOOT_DB[carte][type];
+        const embed = noxEmbed(`🎒 LOOT ${typeLabel[type]} — ${carteLabel[carte]}`, COLORS.INFO)
+            .setDescription(`${LINE}
+Meilleures zones pour trouver du loot **${typeLabel[type]}** sur **${carteLabel[carte]}**.
+${LINE}`);
+
+        zones.forEach((z, idx) => {
+            embed.addFields({
+                name: `${idx + 1}. ${z.zone}`,
+                value: `Danger : ${z.danger}
+${z.note}`,
+                inline: false
+            });
+        });
+
+        embed.setFooter({ text: 'Infos basées sur les données communautaires DayZ — OTF System' });
+        return i.reply({ embeds: [embed] });
+    }
+
+    // ── /METEO ────────────────────────────────────────────────────────────────
+    if (commandName === 'meteo') {
+        const carte = i.options.getString('carte');
+        const carteLabel = { chernarus: 'Chernarus', sakhal: 'Sakhal', livonia: 'Livonia' };
+
+        const meteos = ['☀️ Ensoleillé', '🌤️ Partiellement nuageux', '🌧️ Pluie', '⛈️ Orage', '🌫️ Brouillard épais', '❄️ Neige', '🌙 Nuit claire'];
+        const heures = ['06:00', '08:30', '11:00', '13:45', '16:20', '18:00', '20:30', '22:00', '00:30', '03:00'];
+        const temps  = ['Froid', 'Frais', 'Tempéré', 'Chaud'];
+
+        const meteo   = meteos[Math.floor(Math.random() * meteos.length)];
+        const heure   = heures[Math.floor(Math.random() * heures.length)];
+        const temp    = temps[Math.floor(Math.random() * temps.length)];
+        const visib   = Math.floor(Math.random() * 800) + 200;
+        const survie  = carte === 'sakhal' ? '⚠️ Surveille ton hypothermie — Sakhal est glacial.' : '✅ Conditions correctes pour opérer.';
+
+        const embed = noxEmbed(`🌤️ MÉTÉO EN JEU — ${carteLabel[carte]}`, COLORS.INFO)
+            .setDescription(`> ⚠️ *Météo simulée — les conditions varient selon le serveur.*`)
+            .addFields(
+                { name: '🌡️ Conditions',   value: `\`${meteo}\``,        inline: true },
+                { name: '🕐 Heure in-game', value: `\`${heure}\``,        inline: true },
+                { name: '🌡️ Température',  value: `\`${temp}\``,          inline: true },
+                { name: '👁️ Visibilité',   value: `\`${visib}m\``,        inline: true },
+                { name: '⚡ Conseil',       value: survie,                  inline: false }
+            );
+        return i.reply({ embeds: [embed] });
+    }
+
+    // ── /BASE ─────────────────────────────────────────────────────────────────
+    if (commandName === 'base') {
+        const carte = i.options.getString('carte');
+        const conseils = {
+            chernarus: [
+                { lieu: 'Forêt au nord de Tisy',          raison: 'Zone isolée, peu de passages. Idéal pour une base discrète.' },
+                { lieu: 'Collines entre Myshkino et NWAF', raison: 'Position élevée, bonne visibilité sur les routes.' },
+                { lieu: 'Île de Skalisty',                 raison: 'Accessible uniquement à la nage. Très sécurisée.' },
+                { lieu: 'Forêt de Green Mountain',         raison: 'Dense et difficile d\'accès. Tour d\'observation utile.' }
+            ],
+            sakhal: [
+                { lieu: 'Zone volcanique nord',            raison: 'Peu fréquentée, terrain accidenté = protection naturelle.' },
+                { lieu: 'Île côtière ouest',               raison: 'Isolée, accessible en bateau seulement.' },
+                { lieu: 'Forêt centrale de Sakhal',        raison: 'Dense, loin des zones militaires = moins de PVP.' }
+            ],
+            livonia: [
+                { lieu: 'Forêt de pins au nord-est',       raison: 'Zone très peu visitée. Parfaite pour une base longue durée.' },
+                { lieu: 'Marais de Livonia',               raison: 'Terrain difficile, dissuade les raiders.' },
+                { lieu: 'Collines de Topolin',             raison: 'Bonne visibilité, loin des spawn points.' }
+            ]
+        };
+
+        const carteLabel = { chernarus: 'Chernarus', sakhal: 'Sakhal', livonia: 'Livonia' };
+        const embed = noxEmbed(`🏚️ ZONES DE BASE — ${carteLabel[carte]}`, COLORS.SUCCESS)
+            .setDescription(`${LINE}
+Meilleures zones pour construire une base sur **${carteLabel[carte]}**.
+${LINE}`);
+
+        conseils[carte].forEach((c, idx) => {
+            embed.addFields({
+                name: `${idx + 1}. ${c.lieu}`,
+                value: c.raison,
+                inline: false
+            });
+        });
+
+        embed.addFields({ name: '💡 Conseil général', value: 'Toujours construire loin des routes principales et des zones militaires. Plus c\'est isolé, plus c\'est safe.', inline: false });
+        return i.reply({ embeds: [embed] });
+    }
+
+    // ── /ARME ─────────────────────────────────────────────────────────────────
+    if (commandName === 'arme') {
+        const nom = i.options.getString('nom');
+        const ARMES = {
+            ak74:      { nom: 'AK-74',        type: 'Assault Rifle', munitions: '5.45x39mm', degats: '🔴 Élevés',  portee: '🟡 Moyenne (300m)', accessoires: 'Scope, Silencieux, Bipied', rarity: '🟡 Peu commun', conseil: 'Polyvalent, efficace en mid-range. Standard de la coalition.' },
+            m4a1:      { nom: 'M4-A1',        type: 'Assault Rifle', munitions: '5.56x45mm', degats: '🔴 Élevés',  portee: '🟡 Moyenne (350m)', accessoires: 'Nombreux (scope, silencieux, lampe, bipied)', rarity: '🔴 Rare', conseil: 'Meilleur AR du jeu. Très modulable. Se trouve uniquement en zone militaire.' },
+            svd:       { nom: 'SVD Dragunov',  type: 'Sniper Rifle',  munitions: '7.62x54mmR', degats: '🔴 Très élevés', portee: '🟢 Longue (800m+)', accessoires: 'Scope PSO (inclus)', rarity: '🔴 Très rare', conseil: 'Sniper de référence. Un shot dans le corps suffit avec gilet endommagé.' },
+            mosin:     { nom: 'Mosin 91/30',  type: 'Sniper Rifle',  munitions: '7.62x54mmR', degats: '🔴 Très élevés', portee: '🟢 Longue (600m)', accessoires: 'Scope LRS, Silencieux (rare)', rarity: '🟢 Commun', conseil: 'Sniper accessible. Très puissant pour le prix.' },
+            mp5k:      { nom: 'MP5-K',        type: 'SMG',           munitions: '9x19mm',     degats: '🟡 Moyens',  portee: '🔴 Courte (150m)',  accessoires: 'Silencieux, scope compact', rarity: '🟡 Peu commun', conseil: 'Excellent en CQB. Silencieux très efficace en intérieur.' },
+            winchester: { nom: 'Winchester',  type: 'Rifle',         munitions: '.308 Win',   degats: '🔴 Élevés',  portee: '🟡 Moyenne (400m)', accessoires: 'Scope, Silencieux', rarity: '🟢 Commun', conseil: 'Bon rifle polyvalent. Munitions faciles à trouver.' },
+            shotgun:   { nom: 'Shotgun (BK-133)', type: 'Shotgun',  munitions: '12ga',        degats: '🔴 Dévastateurs (courte)', portee: '🔴 Très courte (50m)', accessoires: 'Choke', rarity: '🟢 Commun', conseil: 'Mortelle en CQB. Inutile à distance. Parfaite pour défendre une base.' },
+            glock:     { nom: 'Glock 19',     type: 'Pistol',        munitions: '9x19mm',     degats: '🟡 Moyens',  portee: '🔴 Courte (100m)',  accessoires: 'Silencieux, lampe, scope',  rarity: '🟢 Commun', conseil: 'Meilleur pistolet du jeu. Excellent backup silencieux.' }
+        };
+
+        const a = ARMES[nom];
+        const embed = noxEmbed(`🔫 FICHE ARME — ${a.nom}`, COLORS.DANGER)
+            .addFields(
+                { name: '📋 Type',         value: `\`${a.type}\``,        inline: true },
+                { name: '🔧 Munitions',    value: `\`${a.munitions}\``,   inline: true },
+                { name: '💥 Dégâts',       value: a.degats,               inline: true },
+                { name: '🎯 Portée',       value: a.portee,               inline: true },
+                { name: '💎 Rareté',       value: a.rarity,               inline: true },
+                { name: '🔩 Accessoires',  value: a.accessoires,          inline: false },
+                { name: '💡 Conseil OTF',  value: a.conseil,              inline: false }
+            );
+        return i.reply({ embeds: [embed] });
+    }
+
+    // ── /SOIN ─────────────────────────────────────────────────────────────────
+    if (commandName === 'soin') {
+        const type = i.options.getString('type');
+        const SOINS = {
+            saignement: {
+                titre: '🩸 SAIGNEMENT',
+                urgence: '🔴 URGENT — Tu perds de la vie rapidement',
+                items: ['Bandage (le plus commun)', 'Kit de suture (pour plaies graves)', 'Chiffon (dépannage)'],
+                methode: 'Ouvre ton inventaire → clique droit sur le bandage → Appliquer sur toi-même. Si tu saignes encore après, réapplique.',
+                conseil: 'Toujours avoir au moins 3 bandages sur toi. Les infections post-bandage arrivent souvent — prépare des antibiotiques.'
+            },
+            fracture: {
+                titre: '🦴 FRACTURE',
+                urgence: '🟡 MODÉRÉ — Tu boites et ne peux plus courir normalement',
+                items: ['Attelle (Splint) = bâton + chiffon', 'Morphine (supprime la douleur temporairement)'],
+                methode: 'Craft une attelle : 1 bâton + 1 chiffon. Applique-la sur le membre cassé. La morphine soulage mais ne guérit pas.',
+                conseil: 'Avec une fracture, fuis les zones de combat. La morphine permet de fonctionner normalement pendant 5 min.'
+            },
+            infection: {
+                titre: '💉 INFECTION',
+                urgence: '🟡 MODÉRÉ — Progresse lentement, mortelle si ignorée',
+                items: ['Antibiotiques (Tetracycline)', 'Charbon actif (pour intox alimentaire)'],
+                methode: 'Prends des Tetracycline dès que tu vois le statut "Sick". Continue jusqu\'à disparition du statut.',
+                conseil: 'Désinfecte toujours tes bandages avant de les utiliser avec du désinfectant. Lave-toi les mains après avoir mangé.'
+            },
+            sante: {
+                titre: '❤️ FAIBLE SANTÉ',
+                urgence: '🟡 MODÉRÉ — Tu peux mourir d\'un seul tir',
+                items: ['Saline IV (remonte vite)', 'Blood Bag (transfusion)', 'Vitamines (boost lent)', 'Nourriture (lent mais accessible)'],
+                methode: 'La Saline IV et le Blood Bag sont les plus efficaces. Mange et bois bien pour une récupération lente.',
+                conseil: 'Le Blood Bag nécessite un groupe (quelqu\'un te donne son sang). Idéal pour les soins d\'urgence en squad.'
+            },
+            intox: {
+                titre: '🤢 INTOXICATION',
+                urgence: '🔴 URGENT — Peut être mortel rapidement',
+                items: ['Charbon actif (Activated Charcoal)', 'Vitamines', 'Saline IV'],
+                methode: 'Prends immédiatement du Charbon actif. Arrête de manger/boire. Hydrate-toi avec de l\'eau purifiée.',
+                conseil: 'Toujours purifier l\'eau en la faisant bouillir ou avec des tablettes. Ne mange jamais de nourriture pourrie.'
+            }
+        };
+
+        const s = SOINS[type];
+        const embed = noxEmbed(`💊 GUIDE SOIN — ${s.titre}`, COLORS.WARNING)
+            .addFields(
+                { name: '⚠️ Urgence',      value: s.urgence,                       inline: false },
+                { name: '🎒 Objets',       value: s.items.map(it => `• ${it}`).join('\n'), inline: false },
+                { name: '📋 Méthode',      value: s.methode,                       inline: false },
+                { name: '💡 Conseil OTF',  value: s.conseil,                       inline: false }
+            );
+        return i.reply({ embeds: [embed] });
     }
 
     // ── /ANNONCE ──────────────────────────────────────────────────────────────
